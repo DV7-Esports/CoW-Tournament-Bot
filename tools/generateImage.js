@@ -1,6 +1,6 @@
 const Canvas = require("canvas")
 const Discord = require("discord.js")
-const background = "https://i.imgur.com/zvWTUVu.jpg"
+const background = "https://github.com/CoW-Tournament/CoW-Tournament-Bot/blob/main/imgs/MiniImage.png?raw=true"
 
 const dim = {
     height: 675,
