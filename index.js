@@ -1,29 +1,26 @@
 const Discord = require('discord.js');
 require('dotenv').config();
-const generateImage = require("./tools/generateImage")
 
 const welcomeChannelId = 934887657794846791;
 
-const intents = ["GUILDS", "GUILD_MEMBERS"];
+const intents = ["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"];
 const client = new Discord.Client({intents: intents, ws: {intents: intents}});
 
-client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}`);
-});
+let bot = {
+    client,
+    prefix: "cow.",
+    owners: ["374295851222171679"]
+};
 
-client.on('messageCreate', (message) => {
-    if (message.content === "hi") {
-        message.reply('Hello world!');
-    }
-});
+client.commands = new Discord.Collection();
+client.events = new Discord.Collection();
 
-client.on('guildMemberAdd', async (member) => {
-    console.log("New member");
-    const img = await generateImage(member);
-    member.guild.systemChannel.send({
-        content: `<@${member.id}> Welcome to the Tournament Realm!`,
-        files: [img]
-    });
-});
+client.loadEvents = (bot, reload) => require("./handlers/events")(bot, reload);
+client.loadEvents(bot, false);
+
+client.loadCommands = (bot, reload) => require("./handlers/commands")(bot, reload);
+client.loadCommands(bot, false);
+
+module.exports = bot;
 
 client.login(process.env.TOKEN);
