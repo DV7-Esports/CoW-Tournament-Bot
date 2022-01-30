@@ -1,7 +1,0 @@
-echo "# CoW-Tournament-Bot" > README.md
-git init
-git add .
-git commit
-git branch -M main
-git remote add origin https://github.com/CoW-Tournament/CoW-Tournament-Bot.git
-git push -u origin main
