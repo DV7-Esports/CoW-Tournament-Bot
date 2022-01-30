@@ -41,7 +41,8 @@ jobs:
 
     - name: Build
       run: |
-         npm run clean
+         rm -rf dist node_modules
+         npm install
          npm run build
 
     - name: Perform CodeQL Analysis
