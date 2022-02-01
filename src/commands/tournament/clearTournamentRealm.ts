@@ -29,6 +29,12 @@ export default class clearRealm extends Command {
                 await client.channels.cache.get(team.roster_channel)?.delete();
                 await client.channels.cache.get(team.voice_channel)?.delete();
                 await message.guild?.roles.cache.get(team.role)?.delete();
+                team.request.captains.forEach(async (captain) => {
+                    ((await client.guilds.cache.get(constants.guild))?.members.cache.get(captain))?.roles.remove(constants.roles.teamCaptain);
+                });
+                team.request.managers.forEach(async (manager) => {
+                    ((await client.guilds.cache.get(constants.guild))?.members.cache.get(manager))?.roles.remove(constants.roles.teamManager);
+                });
             });
             await tables.teams.deleteMany({});
             ((await client.channels.cache.get(constants.teamRequestChannelId)) as TextChannel).bulkDelete(100, true);
