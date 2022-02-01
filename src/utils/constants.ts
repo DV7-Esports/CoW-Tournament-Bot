@@ -22,8 +22,8 @@ export default {
     accountRegions: ['EUNE', 'EUW', 'NA', 'BR', 'LAN', 'LAS', 'OCE', 'KR', 'RU', 'TR', 'JP'],
     roles: {
         everyone: '934887657228623922',
-        teamCaptain: '',
-        teamManager: ''
+        teamCaptain: '937451219063021628',
+        teamManager: '937451261211586623'
     },
-    everyoneId: '934887657228623922'
+    guild: '934887657228623922'
 };

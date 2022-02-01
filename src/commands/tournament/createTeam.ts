@@ -1,18 +1,11 @@
-import {
-    Channel, ColorResolvable, Message, MessageEmbed, TextChannel, User, VoiceChannel
-} from 'discord.js';
-import { OptionalId } from 'mongodb';
-
-import client from '../../client';
+import { ColorResolvable, Message, MessageEmbed, TextChannel, VoiceChannel } from 'discord.js';
 import Command from '../../structures/Command';
 import db from '../../structures/db';
 import DiscordClient from '../../structures/DiscordClient';
 import IDb from '../../structures/IDb';
-import Ign from '../../structures/Ign';
-import Player from '../../structures/Player';
 import Team from '../../structures/Team';
-import TeamRequest from '../../structures/TeamRequest';
 import constants from '../../utils/constants';
+import teamUtils from '../../utils/teamUtils';
 
 export default class createTeam extends Command {
     private tooltipEmbed: MessageEmbed;
@@ -50,174 +43,110 @@ export default class createTeam extends Command {
         });
     }
 
-    async rosterGenerator(name: string, abbrev: string, manager: string, captain: string, members: Player[], requestor: string, validator?: boolean) {
-        let roster = '';
-
-        if (validator === true || validator === undefined) roster = `<@&${constants.accountValidatorRoleId}>\n`;
-
-        roster = roster + `Team ${name} (${abbrev})`;
-
-        if (validator === true || validator === undefined) roster = roster + ` _applied to join the tournament_`;
-
-        roster = roster + `\n\`\`Team manager:\`\` <@${manager}>\n` + `\`\`Team captain:\`\` <@${captain}>\n`;
-
-        members.forEach(player => {
-            roster = roster + `\`\`      Player:\`\` <@${player.user}>\n`;
-            player.igns.forEach(x => {
-                roster = roster + `\`\`             \`\` <https://www.leagueofgraphs.com/summoner/${x.region.toLowerCase()}/${encodeURIComponent(x.summoner)}>\n`;
-            });
-        });
-
-        roster = roster + `\n_Team was initiated by <@!${requestor}>._`;
-
-        return roster;
-    }
-
-    async run(message: Message, args: string[]) {
-        if (args[0] === 'help') {
+    async run(message: Message, argsOriginal: string[]) {
+        if (argsOriginal[0] === 'help') {
             message.reply({ embeds: [this.tooltipEmbed] });
             return;
-        }
-        const reply: Message = await message.reply('_Processing..._');
-        const params: string = args.join(' ');
-        let name: string, abbrev: string, color: string, manager: string, captain: string, members: Player[];
-        try {
-            args = params
-                .split(/\(|\)/)
-                .filter(x => x.trim().length !== 0)
-                .map(x => x.trim());
-            name = args[0];
-            abbrev = args[1];
-            color = args[2];
-            manager = args[3]
-                .split('')
-                .filter(x => '0' <= x && x <= '9')
-                .join('');
-            captain = args[4]
-                .split('')
-                .filter(x => '0' <= x && x <= '9')
-                .join('');
-
-            let warningMessage = '';
-            members = args.slice(5).map(mentionAndIGNs => {
-                const userId: string = mentionAndIGNs
-                    .split('>')[0]
-                    .split('')
-                    .filter(x => '0' <= x && x <= '9')
-                    .join('');
-                const igns: Ign[] = mentionAndIGNs
-                    .split(':')[1]
-                    .split(',')
-                    .map(x => x.trim())
-                    .map(ign => {
-                        let accountInfo: Ign = {
-                            summoner: ign.split('#')[0],
-                            region: ign.split('#')[1].toUpperCase()
-                        } as Ign;
-
-                        if (!accountInfo.region) {
-                            warningMessage += `${accountInfo.summoner} **(${accountInfo.region})** is not from a valid region.\n`;
-                        }
-
-                        return accountInfo;
-                    });
-                return {
-                    user: userId,
-                    igns: igns
-                } as Player;
-            });
-
-            if (warningMessage.length !== 0) {
-                warningMessage += `**The regions are ${constants.accountRegions.join(', ').toString()}.**`;
-                await reply.edit(warningMessage);
-                return;
-            }
-
-            if (members.length < 5) {
-                await message.reply('Your team is incomplete. You do not have enough (at least 5) players.');
-                return;
-            }
-        } catch (err: any) {
-            throw '?Invalid syntax of the command.\n' + err.toString();
         }
 
         if (!message.guild) return;
 
-        const request = await (message.guild.channels.cache.get(constants.teamRequestChannelId) as TextChannel).send(
-            await this.rosterGenerator(name, abbrev, manager, captain, members, message.author.id)
-        );
-        await request.react(constants.reactions.approved);
-        await request.react(constants.reactions.denied);
+        // Notify for processing
+        const reply: Message = await message.reply('_Processing..._');
 
-        const voice_channel: VoiceChannel = await message.guild.channels.create(constants.voice.pending + name, {
+        // Parse parameters
+        let args = argsOriginal.join(' ')
+            .split(/\(|\)/)
+            .filter(x => x.trim().length !== 0)
+            .map(x => x.trim());
+
+        // Generate Team Object
+        let team: Team = {} as Team;
+        try {
+            team = await teamUtils.generateTeam(reply, args);
+            const color = args[2];
+            team.creator = message.author.id;
+            team.request.requestor = message.author.id;
+            team.role = (
+                await message.guild.roles.create({
+                    name: team.request.name as string,
+                    color: color as ColorResolvable,
+                    hoist: true,
+                    mentionable: true,
+                    reason: `Role for the players from team ${team.name}.`,
+                    position: 1
+                })
+            ).id;
+        } catch (err: any) {
+            reply.reply(err.toString());
+        }
+
+        // Generate request message
+        const request = await (message.guild.channels.cache.get(constants.teamRequestChannelId) as TextChannel).send(
+            await teamUtils.rosterGenerator(team)
+        );
+        
+        // Generate team channels
+        const voice_channel: VoiceChannel = await message.guild.channels.create(constants.voice.pending + team.request.name, {
             type: 'GUILD_VOICE',
             parent: constants.teamChannelsCategoryId
         });
-        voice_channel.permissionOverwrites.edit(constants.everyoneId, {
-            VIEW_CHANNEL: false,
-            CONNECT: false
-        });
-        const roster_channel: TextChannel = await message.guild.channels.create(name, {
+
+        const roster_channel: TextChannel = await message.guild.channels.create(team.request.name, {
             type: 'GUILD_TEXT',
             parent: constants.rosterChannelsCategoryId
         });
-        roster_channel.permissionOverwrites.edit(constants.everyoneId, {
+
+        // Send public roster
+        await roster_channel.send(await teamUtils.rosterGenerator(team, true, false));
+        await roster_channel.send(`To edit the roster, use the following command:
+||modifyTeam (<@&${team.role}>) ${argsOriginal.join(' ')} ||`);
+
+        // Set reaction votes
+        await request.react(constants.reactions.approved);
+        await request.react(constants.reactions.denied);
+
+        // Finish team object details
+        team.request.post = request.id;
+        team.roster_channel = roster_channel.id;
+        team.voice_channel = voice_channel.id;
+
+        // Set channel permissions
+        // - everyone
+        voice_channel.permissionOverwrites.edit(constants.roles.everyone, {
+            VIEW_CHANNEL: false,
+            CONNECT: false
+        });
+        roster_channel.permissionOverwrites.edit(constants.roles.everyone, {
             VIEW_CHANNEL: true,
             READ_MESSAGE_HISTORY: true,
             SEND_MESSAGES: false
         });
-        await roster_channel.send(await this.rosterGenerator(name, abbrev, manager, captain, members, message.author.id, false));
-
-        const team: Team = new Team(
-            message.author.id,
-            null,
-            null,
-            [],
-            [],
-            [],
-            {
-                post: request.id,
-                name: name,
-                abbr: abbrev,
-                managers: [manager],
-                captains: [captain],
-                players: members,
-                requestor: message.author.id
-            } as TeamRequest,
-            constants.team.application.pending,
-            voice_channel.id,
-            roster_channel.id,
-            (
-                await message.guild.roles.create({
-                    name: name,
-                    color: color as ColorResolvable,
-                    hoist: true,
-                    mentionable: true,
-                    reason: `Role for the players from team ${name}.`,
-                    position: 1
-                })
-            ).id
-        );
-
+        // - team members
         voice_channel.permissionOverwrites.edit(team.role, {
             VIEW_CHANNEL: true,
             CONNECT: true
         });
 
+        // Give team members roles
         team.request.players.forEach(player => {
             message.guild?.members.cache.get(player.user)?.roles.add(team.role);
         });
         team.request.managers.forEach(user => {
             message.guild?.members.cache.get(user)?.roles.add(team.role);
+            message.guild?.members.cache.get(user)?.roles.add(constants.roles.teamManager);
         });
         team.request.captains.forEach(user => {
             message.guild?.members.cache.get(user)?.roles.add(team.role);
+            message.guild?.members.cache.get(user)?.roles.add(constants.roles.teamCaptain);
         });
 
+        // Add the team to the database
         await db(async (tables: IDb) => {
             tables.teams.insertOne(team);
         });
 
-        await reply.edit('Request received.');
+        // Done message
+        await reply.edit(`Request received, ${message.author.toString()}.`);
     }
 }

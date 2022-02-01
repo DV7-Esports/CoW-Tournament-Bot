@@ -9,7 +9,7 @@ import Event from '../structures/Event';
 import IDb from '../structures/IDb';
 import Team from '../structures/Team';
 import constants from '../utils/constants';
-import teamSetup from '../utils/teamSetup';
+import teamSetup from '../utils/teamCheck';
 
 async function isTeamRequest(message: Message | PartialMessage): Promise<Team> {
     return await db(async (tables: IDb) => {

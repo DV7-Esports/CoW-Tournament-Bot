@@ -15,7 +15,7 @@ export default class DiscordClient extends Client {
     readonly config: IConfig;
 
     constructor(intents: IntentsString[]) {
-        super({ partials: ['USER', 'REACTION', 'MESSAGE'], intents: intents, ws: { intents: intents } as WebSocketOptions });
+        super({ partials: ['USER', 'REACTION', 'MESSAGE'], intents: intents });
 
         /**
          * Setting up client's config.

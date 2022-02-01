@@ -6,7 +6,7 @@ import DiscordClient from './structures/DiscordClient';
 import IDb from './structures/IDb';
 import Team from './structures/Team';
 import constants from './utils/constants';
-import teamSetup from './utils/teamSetup';
+import teamSetup from './utils/teamCheck';
 
 const intents: IntentsString[] = [
     'GUILDS',
