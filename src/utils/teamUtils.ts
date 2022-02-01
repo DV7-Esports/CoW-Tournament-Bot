@@ -1,4 +1,5 @@
-import { Message } from "discord.js";
+import { Message, TextChannel } from "discord.js";
+import client from "../client";
 import db from "../structures/db";
 import DiscordClient from "../structures/DiscordClient";
 import Ign from "../structures/Ign";
@@ -146,6 +147,21 @@ async function updateTeam(reply: Message, team: Team, updatedTeam: Team) {
     await reply.client.guilds.cache.get(constants.guild)?.channels.cache.get(team.voice_channel)?.setName(constants.voice.pending + updatedTeam.name);
     // - Role names
     await reply.client.guilds.cache.get(constants.guild)?.roles.cache.get(team.role)?.setName(updatedTeam.name as string);
+
+    // Update the request
+    // - Generate request message
+    const request = await (reply.client.guilds.cache.get(constants.guild)?.channels.cache.get(constants.teamRequestChannelId) as TextChannel).send(
+        await rosterGenerator(team)
+    );
+    // - Set reaction votes
+    await request.react(constants.reactions.approved);
+    await request.react(constants.reactions.denied);
+    // - DB
+    await db(async (tables) => {
+        await tables.teams.updateOne({_id: team._id}, {'$set': {
+            'request.post': request.id
+        }});
+    });
 }
 
 export default {
