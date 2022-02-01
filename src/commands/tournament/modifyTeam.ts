@@ -83,13 +83,14 @@ export default class createTeam extends Command {
         // 1. User = Account Validator
         if (message.guild.members.cache.get(message.author.id)?.roles.cache.has(constants.accountValidatorRoleId)) {
             const newTeam = await teamUtils.generateTeam(reply, args);
-            teamUtils.updateTeam(reply, team, newTeam);
+            await teamUtils.updateTeam(reply, team, newTeam);
             await reply.edit(`${message.author.toString()}, the changes were applied successfully`);
         }
         // 2. User = Team Manager
         else if (team.managers.some((manager) => manager === message.author.id)) {
             const newTeam = await teamUtils.generateTeam(reply, args);
-            teamUtils.updateTeam(reply, team, newTeam);
+            await teamUtils.updateTeam(reply, team, newTeam);
+            await reply.edit(`${message.author.toString()}, the changes were applied successfully`);
         }
         // 3. User = Team Captain
         else if (team.captains.some((captain) => captain === message.author.id)) {
@@ -98,7 +99,8 @@ export default class createTeam extends Command {
                 await reply.edit(`${message.author.toString()}, you are captain of Team "${team.name}". Therefore, you cannot change your team manager(s). Please, contact the team managers. (ref. <#${team.roster_channel}>)`);
                 return;
             }
-            teamUtils.updateTeam(reply, team, newTeam);
+            await teamUtils.updateTeam(reply, team, newTeam);
+            await reply.edit(`${message.author.toString()}, the changes were applied successfully`);
         }
         // 4. Other
         else

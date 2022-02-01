@@ -1,7 +1,7 @@
 {
-  "name": "ts-discord-bot",
+  "name": "CoW Tournament Realm",
   "version": "2.0.0",
-  "description": "Discord bot made with Typescript",
+  "description": "Official CoW Tournament Realm Discord Bot",
   "scripts": {
     "clean": "rimraf dist",
     "build": "yarn clean && tsc -p .",
@@ -33,10 +33,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BUR4KBEY/ts-discord-bot.git"
+    "url": "git+https://github.com/CoW-Tournament/CoW-Tournament-Bot.git"
   },
   "bugs": {
-    "url": "https://github.com/BUR4KBEY/ts-discord-bot/issues"
+    "url": "https://github.com/CoW-Tournament/CoW-Tournament-Bot/issues"
   },
-  "homepage": "https://github.com/BUR4KBEY/ts-discord-bot#readme"
+  "homepage": "https://github.com/CoW-Tournament/CoW-Tournament-Bot#readme"
 }
