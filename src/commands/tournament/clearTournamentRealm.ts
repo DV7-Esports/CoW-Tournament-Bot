@@ -38,6 +38,7 @@ export default class clearRealm extends Command {
             });
             await tables.teams.deleteMany({});
             ((await client.channels.cache.get(constants.teamRequestChannelId)) as TextChannel).bulkDelete(100, true);
+            ((await client.channels.cache.get(constants.lfs)) as TextChannel).bulkDelete(100, true);
         });
     }
 }

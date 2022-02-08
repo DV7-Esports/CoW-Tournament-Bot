@@ -6,6 +6,7 @@ import IDb from '../../structures/IDb';
 import Team from '../../structures/Team';
 import constants from '../../utils/constants';
 import teamUtils from '../../utils/teamUtils';
+import dotenv from 'dotenv';
 
 export default class createTeam extends Command {
     private tooltipEmbed: MessageEmbed;
@@ -100,7 +101,7 @@ export default class createTeam extends Command {
         // Send public roster
         await roster_channel.send(await teamUtils.rosterGenerator(team, true, false));
         await roster_channel.send(`To edit the roster, use the following command:
-||modifyTeam (<@&${team.role}>) ${argsOriginal.join(' ')} ||`);
+||` + process.env.PREFIX + `modifyTeam (<@&${team.role}>) ${argsOriginal.join(' ')} ||`);
 
         // Set reaction votes
         await request.react(constants.reactions.approved);

@@ -1,6 +1,6 @@
 import {
     GuildMember, Message, MessageReaction, PartialMessage, PartialMessageReaction, PartialUser,
-    Role, User
+    Role, TextChannel, User
 } from 'discord.js';
 
 import db from '../structures/db';
@@ -10,6 +10,7 @@ import IDb from '../structures/IDb';
 import Team from '../structures/Team';
 import constants from '../utils/constants';
 import teamSetup from '../utils/teamCheck';
+import teamUtils from '../utils/teamUtils';
 
 async function isTeamRequest(message: Message | PartialMessage): Promise<Team> {
     return await db(async (tables: IDb) => {
@@ -38,6 +39,15 @@ export default class MessageReactionAddEvent extends Event {
                 if (!team._id) throw 'No team found';
                 if (reaction.emoji.toString() === constants.reactions.approved) {
                     teamSetup.approve(this.client, team._id, user as User);
+                    let updatedTeam: Team = {} as Team;
+                    await db(async (tables: IDb) => {
+                        updatedTeam = await tables.teams.findOne({ 'request.post': reaction.message.id.toString() }) as Team;
+                    });
+                    const roster_channel = await reaction.message.guild.channels.cache.get(updatedTeam.roster_channel) as TextChannel;
+                    await roster_channel.bulkDelete(100, true);
+                    await roster_channel.send(await teamUtils.rosterGenerator(team, true, false));
+                    await roster_channel.send(`To edit the roster, use the following command:
+||${team.request.command} ||`);
                 } else if (reaction.emoji.toString() === constants.reactions.denied) {
                     teamSetup.deny(this.client, team._id, user as User);
                 }
