@@ -9,6 +9,7 @@ export default class TeamRequest {
         public captains: Array<string>,
         public players: Array<Player>,
         public requestor: string,
-        public validator: string | null
+        public validator: string | null,
+        public command: string | null
     ) {}
 }

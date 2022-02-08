@@ -7,14 +7,15 @@ export default {
         }
     },
     reactions: {
-        approved: '✔️',
+        approved: '✅',
         denied: '❌'
     },
     voice: {
-        approved: '✔️',
+        approved: '✅',
         denied: '❌',
         pending: '❔'
     },
+    lfs: '938030861851443260',
     accountValidatorRoleId: '935147009495674900',
     teamChannelsCategoryId: '935114455048654878',
     rosterChannelsCategoryId: '936688705043824640',

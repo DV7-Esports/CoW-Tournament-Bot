@@ -130,7 +130,7 @@ async function generateTeam(reply: Message, args : string[]): Promise<Team> {
     return team;
 }
 
-async function updateTeam(reply: Message, team: Team, updatedTeam: Team) {
+async function updateTeam(reply: Message, team: Team, updatedTeam: Team, command: string | undefined) {
     // Update team name
     // - DB
     await db(async (tables) => {
@@ -140,8 +140,10 @@ async function updateTeam(reply: Message, team: Team, updatedTeam: Team) {
             'request.managers': updatedTeam.managers,
             'request.captains': updatedTeam.captains,
             'request.players': updatedTeam.players,
+            'request.command': command,
             'status': constants.team.application.pending
         }});
+        team = await tables.teams.findOne({_id: team._id}) as Team;
     });
     // - Channel names
     await reply.client.guilds.cache.get(constants.guild)?.channels.cache.get(team.voice_channel)?.setName(constants.voice.pending + updatedTeam.name);
@@ -149,7 +151,10 @@ async function updateTeam(reply: Message, team: Team, updatedTeam: Team) {
     await reply.client.guilds.cache.get(constants.guild)?.roles.cache.get(team.role)?.setName(updatedTeam.name as string);
 
     // Update the request
-    // - Generate request message
+    // - Edit old request
+    await (reply.client.guilds.cache.get(constants.guild)?.channels.cache.get(constants.teamRequestChannelId) as TextChannel).messages.cache.get(team.request.post)?.edit(`_New request available for Team <@&${team.role}>._`);
+    await (reply.client.guilds.cache.get(constants.guild)?.channels.cache.get(constants.teamRequestChannelId) as TextChannel).messages.cache.get(team.request.post)?.reactions.removeAll();
+    // - Create new request
     const request = await (reply.client.guilds.cache.get(constants.guild)?.channels.cache.get(constants.teamRequestChannelId) as TextChannel).send(
         await rosterGenerator(team)
     );

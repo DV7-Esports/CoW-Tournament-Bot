@@ -20,7 +20,8 @@
     "moment-timezone": "^0.5.33",
     "mongodb": "^4.3.1",
     "path": "^0.12.7",
-    "require-all": "^3.0.0"
+    "require-all": "^3.0.0",
+    "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
     "@types/moment-duration-format": "^2.2.3",
