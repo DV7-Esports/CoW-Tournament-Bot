@@ -4,6 +4,7 @@ import db from "../structures/db";
 import DiscordClient from "../structures/DiscordClient";
 import Ign from "../structures/Ign";
 import Player from "../structures/Player";
+import { Region } from "../structures/Region";
 import Team from "../structures/Team";
 import TeamRequest from "../structures/TeamRequest";
 import constants from "./constants";
@@ -41,37 +42,32 @@ async function rosterGenerator(team: Team, request?: boolean, validator?: boolea
 }
 
 async function generateTeam(reply: Message, args : string[]): Promise<Team> {
+    let fetchedMemebers = await reply.guild?.members.fetch();
     let name: string, abbrev: string, color: string, managers: string[], captains: string[], members: Player[];
-    console.log(args);
     name = args[0];
     abbrev = args[1];
     color = args[2];
-    managers = args[3]
-        .split('>')
-        .map((member) => member
-            .split('')
-            .filter(x => '0' <= x && x <= '9')
-            .join('')
-        )
-        .filter(x => x.trim().length !== 0);
-    captains = args[4]
-        .split('>')
-        .map((member) => member
-            .split('')
-            .filter(x => '0' <= x && x <= '9')
-            .join('')
-        )
-        .filter(x => x.trim().length !== 0);
-
+    managers = [fetchedMemebers?.find(member => member.user.username === args[3].split('#')[0] &&
+                                        member.user.discriminator === args[3].split('#')[1])?.id as string];
+    captains = [fetchedMemebers?.find(member => member.user.username === args[4].split('#')[0] &&
+                                        member.user.discriminator === args[4].split('#')[1])?.id as string];
+    
     let warningMessage = '';
-    members = args.slice(5).map(mentionAndIGNs => {
-        const userId: string = mentionAndIGNs
-            .split('>')[0]
-            .split('')
-            .filter(x => '0' <= x && x <= '9')
-            .join('');
-        const igns: Ign[] = mentionAndIGNs
-            .split(':')[1]
+    members = args.slice(5).reduce((array, value, index) => {
+        if (index % 2 === 0) {
+            array.push({
+                'user': value,
+                'igns': undefined
+            } as any);
+        }
+        else {
+            array[array.length - 1]['igns'] = value;
+        }
+        return array;
+    }, [] as {'user': string, 'igns': string}[]).map(users => {
+        const userId: string = fetchedMemebers?.find(member => member.user.username === users['user'].split('#')[0] &&
+                                                        member.user.discriminator === users['user'].split('#')[1])?.id as string;
+        const igns: Ign[] = users['igns']
             .split(',')
             .map(x => x.trim())
             .map(ign => {
@@ -81,6 +77,7 @@ async function generateTeam(reply: Message, args : string[]): Promise<Team> {
                 } as Ign;
 
                 if (!accountInfo.region) {
+                    accountInfo.region = Region.INVALID;
                     warningMessage += `${accountInfo.summoner} **(${accountInfo.region})** is not from a valid region.\n`;
                 }
 
@@ -119,7 +116,8 @@ async function generateTeam(reply: Message, args : string[]): Promise<Team> {
             managers: managers,
             captains: captains,
             players: members,
-            requestor: ''
+            requestor: '',
+            params: args
         } as TeamRequest,
         constants.team.application.pending,
         '',
@@ -130,7 +128,7 @@ async function generateTeam(reply: Message, args : string[]): Promise<Team> {
     return team;
 }
 
-async function updateTeam(reply: Message, team: Team, updatedTeam: Team, command: string | undefined) {
+async function updateTeam(reply: Message, team: Team, updatedTeam: Team) {
     // Update team name
     // - DB
     await db(async (tables) => {
@@ -140,7 +138,7 @@ async function updateTeam(reply: Message, team: Team, updatedTeam: Team, command
             'request.managers': updatedTeam.managers,
             'request.captains': updatedTeam.captains,
             'request.players': updatedTeam.players,
-            'request.command': command,
+            'request.params': updatedTeam.request.params,
             'status': constants.team.application.pending
         }});
         team = await tables.teams.findOne({_id: team._id}) as Team;

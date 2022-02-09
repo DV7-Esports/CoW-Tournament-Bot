@@ -1,4 +1,5 @@
 export enum Region {
+    INVALID = 'Invalid',
     EUNE = 'EUNE', 
     EUW = 'EUW', 
     NA = 'NA', 

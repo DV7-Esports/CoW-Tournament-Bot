@@ -7,6 +7,9 @@ import Team from '../../structures/Team';
 import constants from '../../utils/constants';
 import teamUtils from '../../utils/teamUtils';
 import dotenv from 'dotenv';
+import { env } from 'process';
+import getParams from '../../utils/dmInterface';
+import { IQuestion } from '../../utils/interfaces';
 
 export default class createTeam extends Command {
     private tooltipEmbed: MessageEmbed;
@@ -18,7 +21,117 @@ export default class createTeam extends Command {
             enabled: true,
             onlyNsfw: false,
             examples: [
-                'createTeam (Full name) (Abbreviature) (Role color - ex. #00ff00) ( @Manager ) ( @Captain ) ( @Player1 : Account1#EUW, Account2#EUNE) ( @Player2 : Account1#EUW) ( @Player3 : Account1#EUW) ...'
+                'type ``' + process.env.prefix + 'createTeam`` and check your DMs :smiley:'
+            ],
+            questions: [
+                {
+                    question: 'What is the name of the team? _Up to 16 symbols_',
+                    options: {answerRegex: '.{1,16}'}
+                },
+                {
+                    question: 'What is your tag? _Use only latin capital letters and/or digits. Max 4 symbols_',
+                    options: {answerRegex: '[A-Z0-9]{1,4}'}
+                },
+                {
+                    question: 'What color should your role be? _Find the code of your color using <https://www.color-hex.com/>_. Ex: Instead of red put #ff0000',
+                    options: {answerRegex: '#[0-9a-f]{6}'}
+                },
+                {
+                    question: 'Who is the manager of the team? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}'}
+                },
+                {
+                    question: 'Who is the captain of the team? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}'}
+                },
+                {
+                    question: 'Now you will need to list your players one by one.',
+                    options: {noanswer: true}
+                },
+                {
+                    question: 'Who is your player #1? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}'}
+                },
+                {
+                    question: 'What are all the accounts of player #1? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'Who is your player #2? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}'}
+                },
+                {
+                    question: 'What are all the accounts of player #2? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'Who is your player #3? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}'}
+                },
+                {
+                    question: 'What are all the accounts of player #3? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'Who is your player #4? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}'}
+                },
+                {
+                    question: 'What are all the accounts of player #4? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'Who is your player #5? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}'}
+                },
+                {
+                    question: 'What are all the accounts of player #5? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'The following questions are not mandatory. You can stop listing players by typing \'stop\'',
+                    options: {noanswer: true}
+                },
+                {
+                    question: 'Who is your player #6? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}', optional: true}
+                },
+                {
+                    question: 'What are all the accounts of player #6? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'Who is your player #7? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}', optional: true}
+                },
+                {
+                    question: 'What are all the accounts of player #7? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'Who is your player #8? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}', optional: true}
+                },
+                {
+                    question: 'What are all the accounts of player #8? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'Who is your player #9? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}', optional: true}
+                },
+                {
+                    question: 'What are all the accounts of player #9? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
+                {
+                    question: 'Who is your player #10? _Ex. CoW Cup Bot#8774_',
+                    options: {answerRegex: '.+#[0-9]{4}', optional: true}
+                },
+                {
+                    question: 'What are all the accounts of player #10? _Make sure to mention the server and to separate the accounts with \',\' (comma)._\n_Ex. Coder of worlds#EUW, Top TTS#EUNE_',
+                    options: {answerRegex: '(.+#[EUNE|EUW|NA|BR|LAN|LAS|OCE|KR|RU|TR|JP],?)+'}
+                },
             ],
             description: 'Allows you to create your own team.',
             cooldown: 30
@@ -30,16 +143,12 @@ export default class createTeam extends Command {
             fields: [
                 {
                     name: 'Usage',
-                    value: this.info.examples ? this.info.examples.map(x => `\`${x}\``).join('\n') : 'No examples'
+                    value: this.info.examples ? this.info.examples.map(x => `${x}`).join('\n') : 'No examples'
                 },
                 {
                     name: 'Description',
                     value: this.info.description ? this.info.description : 'No description'
                 },
-                {
-                    name: 'Notes',
-                    value: 'Make sure to put the brackets!'
-                }
             ]
         });
     }
@@ -52,14 +161,21 @@ export default class createTeam extends Command {
 
         if (!message.guild) return;
 
-        // Notify for processing
-        const reply: Message = await message.reply('_Processing..._');
+        const dmInitiation = await message.author.send('Hello! Thanks for registrating your team. We have to ask you a few questions before completing your application.');
 
         // Parse parameters
-        let args = argsOriginal.join(' ')
-            .split(/\(|\)/)
-            .filter(x => x.trim().length !== 0)
-            .map(x => x.trim());
+        const args = (await getParams.questionnaire(dmInitiation, this.info.questions as IQuestion[]))
+                    .filter(x => x.trim().length !== 0)
+                    .map(x => x.trim());
+        if(args.length === 0) {
+            await message.reply('_Timed out..._');
+            return;
+        } else {
+            dmInitiation.channel.send('Thank you for the application! :smiley: We are currently reviewing so we will get back to you as soon as we have a decision.')
+        }
+                    
+        // Notify for processing
+        const reply: Message = await message.reply('_Processing..._');
 
         // Generate Team Object
         let team: Team = {} as Team;
@@ -101,7 +217,7 @@ export default class createTeam extends Command {
         // Send public roster
         await roster_channel.send(await teamUtils.rosterGenerator(team, true, false));
         await roster_channel.send(`To edit the roster, use the following command:
-||` + process.env.PREFIX + `modifyTeam (<@&${team.role}>) ${argsOriginal.join(' ')} ||`);
+||` + process.env.PREFIX + `modifyTeam <@&${team.role}> ||`);
 
         // Set reaction votes
         await request.react(constants.reactions.approved);

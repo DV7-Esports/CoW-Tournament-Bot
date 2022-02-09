@@ -20,6 +20,48 @@ export interface IConfig {
 }
 
 /**
+ * Information interface for questions.
+ */
+ export interface IQuestionOptions {
+    
+    /**
+     * If the question is optional (optional = true), by typing 'stop' you can finalize answering the questions.
+     */
+     optional?: boolean;
+    
+    /**
+     * If the question not expected to be answered or is not a question at all, set noanswer to true.
+     */
+    noanswer?: boolean;
+        
+    /**
+     * General format of the answer to the question.
+     */
+    answerRegex?: string;
+
+    /**
+     * Sets default answer.
+     */
+    default?: boolean;
+}
+
+/**
+ * Information interface for options for questions.
+ */
+ export interface IQuestion {
+     
+    /**
+     * The messege that's gonna be sent.
+     */
+    question: string;
+    
+    /**
+     * Custom options for this question.
+     */
+    options?: IQuestionOptions;
+}
+
+/**
  * Information interface for commands.
  */
 export interface ICommandInfo {
@@ -37,6 +79,9 @@ export interface ICommandInfo {
 
     /** Description of the command */
     description?: string;
+
+    /** Questions in order to collect the command parameters */
+    questions?: IQuestion[];
 
     /**
      * Time to wait for each use (seconds)
