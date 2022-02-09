@@ -1,15 +1,15 @@
 {
-  "name": "CoW Tournament Realm",
+  "name": "cow-tournament-realm",
   "version": "2.0.0",
   "description": "Official CoW Tournament Realm Discord Bot",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "yarn clean && tsc -p .",
+    "build": "npm run clean && tsc -p .",
     "start": "node dist/index.js",
     "dev": "nodemon -w ./src -w ./.env ./src/index.ts"
   },
-  "author": "BurakBey",
-  "license": "MIT",
+  "author": "Alex-Tsvetanov",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@types/mongodb": "^4.0.7",
     "canvas": "^2.9.0",
