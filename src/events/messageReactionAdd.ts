@@ -47,7 +47,7 @@ export default class MessageReactionAddEvent extends Event {
                     await roster_channel.bulkDelete(100, true);
                     await roster_channel.send(await teamUtils.rosterGenerator(team, true, false));
                     await roster_channel.send(`To edit the roster, use the following command:
-||${team.request.command} ||`);
+||` + process.env.prefix + `modifyTeam ||`);
                 } else if (reaction.emoji.toString() === constants.reactions.denied) {
                     teamSetup.deny(this.client, team._id, user as User);
                 }
