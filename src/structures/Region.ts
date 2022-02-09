@@ -1,4 +1,4 @@
-export default enum Region {
+export enum Region {
     EUNE = 'EUNE', 
     EUW = 'EUW', 
     NA = 'NA', 
