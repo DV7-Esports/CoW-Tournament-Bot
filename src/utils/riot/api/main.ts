@@ -1,0 +1,7 @@
+class RiotApi {
+    
+}
+
+export default {
+
+};
