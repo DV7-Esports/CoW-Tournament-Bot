@@ -4,7 +4,7 @@
   "description": "Official CoW Tournament Realm Discord Bot",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc -p .",
+    "build": "npm run clean && tsc -p . && cp -rf ./src/express/views dist/express/ && cp -rf ./src/express/public dist/express/",
     "start": "node dist/index.js",
     "dev": "nodemon -w ./src -w ./.env ./src/index.ts"
   },
