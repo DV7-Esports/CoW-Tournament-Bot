@@ -25,9 +25,7 @@
     "require-all": "^3.0.0",
     "xmlhttprequest": "^1.8.0",
     "http-errors": "^1.7.1",
-    "pug": "^3.0.1"
-  },
-  "devDependencies": {
+    "pug": "^3.0.1",
     "@types/express": "^4.17.13",
     "@types/http-errors": "^1.8.2",
     "@types/moment-duration-format": "^2.2.3",
