@@ -2,6 +2,7 @@ import {
     GuildMember, Message, MessageReaction, PartialMessage, PartialMessageReaction, PartialUser,
     Role, TextChannel, User
 } from 'discord.js';
+import { receiveMessageOnPort } from 'worker_threads';
 
 import db from '../structures/db';
 import DiscordClient from '../structures/DiscordClient';
@@ -27,6 +28,8 @@ export default class MessageReactionAddEvent extends Event {
         if (user.bot) return;
 
         if (!reaction.message.guild) return;
+
+        if (reaction.message.channel.id !== constants.teamRequestChannelId) return;
 
         if (!reaction.message.guild.members.cache.get(user.id)?.roles.cache.some((role: Role) => role.id === constants.accountValidatorRoleId)) {
             reaction.message.reply(`${user.toString()} has no permission to approve teams.`);
