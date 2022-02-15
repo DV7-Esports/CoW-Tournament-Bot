@@ -25,6 +25,10 @@ export default class createTeam extends Command {
             ],
             questions: [
                 {
+                    question: 'Before entering your members and their Discords, make sure they have joined the server. <https://discord.gg/f7XBmS65fd>',
+                    options: {noanswer: true}
+                },
+                {
                     question: 'What is the name of the team? _Up to 16 symbols_',
                     options: {answerRegex: '.{1,16}'}
                 },
