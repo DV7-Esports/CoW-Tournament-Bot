@@ -25,6 +25,8 @@ export default class MessageReactionAddEvent extends Event {
     }
 
     async run(reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) {
+        require('dotenv').config();
+
         if (user.bot) return;
 
         if (!reaction.message.guild) return;
