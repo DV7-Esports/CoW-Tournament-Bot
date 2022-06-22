@@ -7,5 +7,6 @@ export default interface IDb {
     teams: Collection<Team>;
     players: Collection<Document>;
     player_stats: Collection<Document>;
-    matches: Collection<Document>;
+    matches: Collection<Match>;
+    match_stats: Collection<Document>;
 }
